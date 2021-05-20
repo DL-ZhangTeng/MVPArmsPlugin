@@ -26,7 +26,8 @@
         <!-- Add your actions here -->
         <action id="MVPArmsPlugin.ID" class="com.github.duoluo9.MVPArmsPlugin.MVPArmsPluginAction" text="MVPArmsHelper"
                 description="MVPArms生成工具">
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="before" relative-to-action="WeighingNewGroup"/>
+            <add-to-group group-id="NewGroup" anchor="first"/>
+<!--            <add-to-group group-id="ProjectViewPopupMenu" anchor="before" relative-to-action="WeighingNewGroup"/>-->
         </action>
     </actions>
 
