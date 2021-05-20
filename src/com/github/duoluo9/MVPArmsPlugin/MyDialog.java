@@ -1,3 +1,5 @@
+package com.github.duoluo9.MVPArmsPlugin;
+
 import javax.swing.*;
 import java.awt.event.*;
 

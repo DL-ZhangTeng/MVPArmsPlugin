@@ -1,3 +1,5 @@
+package com.github.duoluo9.MVPArmsPlugin;
+
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -183,7 +185,7 @@ public class MVPArmsPluginAction extends AnAction {
      */
     private String ReadTemplateFile(String fileName) {
         InputStream in = null;
-        in = this.getClass().getResourceAsStream("/Template/" + fileName);
+        in = this.getClass().getResourceAsStream("/com/github/duoluo9/MVPArmsPlugin/Template/" + fileName);
         String content = "";
         try {
             content = new String(readStream(in));

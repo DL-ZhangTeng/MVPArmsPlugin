@@ -1,32 +1,33 @@
 <idea-plugin>
-  <id>com.github.duoluo9.MVPArmsPlugin.plugin.id</id>
-  <name>MVPArmsPlugin</name>
-  <version>1.0</version>
-  <vendor email="763263311@qq.com" url="https://github.com/duoluo9">duoluo9</vendor>
+    <id>com.github.duoluo9.MVPArmsPlugin.plugin.id</id>
+    <name>MVPArmsPlugin</name>
+    <version>1.0</version>
+    <vendor email="763263311@qq.com" url="https://github.com/duoluo9">duoluo9</vendor>
 
-  <description><![CDATA[MVPArmsPlugin<br>]]></description>
+    <description><![CDATA[MVPArmsPlugin<br>]]></description>
 
-  <change-notes><![CDATA[
+    <change-notes><![CDATA[
       1.0<br>
     ]]>
-  </change-notes>
+    </change-notes>
 
-  <!-- please see https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html for description -->
-  <idea-version since-build="173.0"/>
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html for description -->
+    <idea-version since-build="173.0"/>
 
-  <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
-       on how to target different products -->
-  <depends>com.intellij.modules.platform</depends>
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
 
-  <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
-  </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
 
-  <actions>
-    <!-- Add your actions here -->
-    <action id="MVPArmsPlugin.ID" class="MVPArmsPluginAction" text="MVPArmsHelper" description="MVPArms生成工具">
-      <add-to-group group-id="ProjectViewPopupMenu" anchor="before" relative-to-action="WeighingNewGroup"/>
-    </action>
-  </actions>
+    <actions>
+        <!-- Add your actions here -->
+        <action id="MVPArmsPlugin.ID" class="com.github.duoluo9.MVPArmsPlugin.MVPArmsPluginAction" text="MVPArmsHelper"
+                description="MVPArms生成工具">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="before" relative-to-action="WeighingNewGroup"/>
+        </action>
+    </actions>
 
 </idea-plugin>
