@@ -8,6 +8,8 @@ public class MyDialog extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField textField1;
+    private JRadioButton radioButton1;
+    private JRadioButton radioButton2;
 
     private DialogCallBack mCallBack;
 
@@ -46,8 +48,8 @@ public class MyDialog extends JDialog {
     }
 
     private void onOK() {
-        if (null != mCallBack){
-            mCallBack.ok(textField1.getText().trim());
+        if (null != mCallBack) {
+            mCallBack.ok(textField1.getText().trim(), radioButton1.isSelected(), radioButton2.isSelected());
         }
         dispose();
     }
@@ -56,7 +58,7 @@ public class MyDialog extends JDialog {
         dispose();
     }
 
-    public interface DialogCallBack{
-        void ok(String pageName);
+    public interface DialogCallBack {
+        void ok(String pageName, boolean needActivity, boolean needFragment);
     }
 }

@@ -3,7 +3,7 @@ package ${packageName}.mvp.presenter
 import android.app.Application
 
 import com.jess.arms.integration.AppManager
-import com.jess.arms.di.scope.ActivityScope
+${scopeLessImport}
 import com.jess.arms.mvp.BasePresenter
 import com.jess.arms.http.imageloader.ImageLoader
 import me.jessyan.rxerrorhandler.core.RxErrorHandler
@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 import ${packageName}.mvp.contract.${pageName}Contract
 
-@ActivityScope
+${scope}
 class ${pageName}Presenter
 @Inject
 constructor(model: ${pageName}Contract.Model, rootView: ${pageName}Contract.View) :

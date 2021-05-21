@@ -3,6 +3,7 @@ package com.github.duoluo9.MVPArmsPlugin;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,18 +20,22 @@ public class MVPArmsPluginAction extends AnAction {
 
 
     private Project project;
+    private Module module;
     //包名
     private String packageName = "";
     private String pageName;
+    private boolean needActivity;
+    private boolean needFragment;
 
 
     private enum CodeType {
-        Activity, COMPONENT, Contract, Presenter, MODEL, MODULE, LAYOUT
+        Activity, Fragment, COMPONENT, Contract, Presenter, MODEL, MODULE, Activity_LAYOUT, Fragment_LAYOUT
     }
 
     @Override
     public void actionPerformed(AnActionEvent e) {
         project = e.getData(PlatformDataKeys.PROJECT);
+        module = (Module) e.getDataContext().getData("module");
         packageName = getPackageName();
         init();
         refreshProject(e);
@@ -49,8 +54,10 @@ public class MVPArmsPluginAction extends AnAction {
      * 初始化Dialog
      */
     private void init() {
-        MyDialog myDialog = new MyDialog(pageName -> {
+        MyDialog myDialog = new MyDialog((pageName, needActivity, needFragment) -> {
             MVPArmsPluginAction.this.pageName = pageName;
+            MVPArmsPluginAction.this.needActivity = needActivity;
+            MVPArmsPluginAction.this.needFragment = needFragment;
             createClassFiles();
         });
         myDialog.setVisible(true);
@@ -61,13 +68,19 @@ public class MVPArmsPluginAction extends AnAction {
      * 生成类文件
      */
     private void createClassFiles() {
-        createClassFile(CodeType.Activity);
+        if (needActivity) {
+            createClassFile(CodeType.Activity);
+            createClassFile(CodeType.Activity_LAYOUT);
+        }
+        if (needFragment) {
+            createClassFile(CodeType.Fragment);
+            createClassFile(CodeType.Fragment_LAYOUT);
+        }
         createClassFile(CodeType.Contract);
         createClassFile(CodeType.Presenter);
         createClassFile(CodeType.COMPONENT);
         createClassFile(CodeType.MODEL);
         createClassFile(CodeType.MODULE);
-        createClassFile(CodeType.LAYOUT);
     }
 
     /**
@@ -86,6 +99,12 @@ public class MVPArmsPluginAction extends AnAction {
                 content = dealTemplateContent(content);
                 writeToFile(content, appPath + "mvp/ui/activity", pageName + "Activity.kt");
                 break;
+            case Fragment:
+                fileName = "ArmsFragment.kt.ftl";
+                content = ReadTemplateFile(fileName);
+                content = dealTemplateContent(content);
+                writeToFile(content, appPath + "mvp/ui/fragment", pageName + "fragment.kt");
+                break;
             case Contract:
                 fileName = "ArmsContract.kt.ftl";
                 content = ReadTemplateFile(fileName);
@@ -95,31 +114,40 @@ public class MVPArmsPluginAction extends AnAction {
             case Presenter:
                 fileName = "ArmsPresenter.kt.ftl";
                 content = ReadTemplateFile(fileName);
+                content = dealTemplateScope(content, false);
                 content = dealTemplateContent(content);
                 writeToFile(content, appPath + "mvp/presenter", pageName + "Presenter.kt");
                 break;
             case MODEL:
                 fileName = "ArmsModel.kt.ftl";
                 content = ReadTemplateFile(fileName);
+                content = dealTemplateScope(content, false);
                 content = dealTemplateContent(content);
                 writeToFile(content, appPath + "mvp/model", pageName + "Model.kt");
                 break;
             case COMPONENT:
                 fileName = "ArmsComponent.java.ftl";
                 content = ReadTemplateFile(fileName);
+                content = dealTemplateScope(content, true);
                 content = dealTemplateContent(content);
                 writeToFile(content, appPath + "di/component", pageName + "Component.java");
                 break;
             case MODULE:
                 fileName = "ArmsModule.java.ftl";
                 content = ReadTemplateFile(fileName);
+                content = dealTemplateScope(content, true);
                 content = dealTemplateContent(content);
                 writeToFile(content, appPath + "di/module", pageName + "Module.java");
                 break;
-            case LAYOUT:
+            case Activity_LAYOUT:
                 fileName = "simple.xml.ftl";
                 content = ReadTemplateFile(fileName);
                 writeToFile(content, getAppResPath(), "activity_" + pageName.toLowerCase() + ".xml");
+                break;
+            case Fragment_LAYOUT:
+                fileName = "simple.xml.ftl";
+                content = ReadTemplateFile(fileName);
+                writeToFile(content, getAppResPath(), "fragment_" + pageName.toLowerCase() + ".xml");
                 break;
         }
     }
@@ -131,7 +159,7 @@ public class MVPArmsPluginAction extends AnAction {
      */
     private String getAppPath() {
         String packagePath = packageName.replace(".", "/");
-        String appPath = project.getBasePath() + "/App/src/main/java/" + packagePath + "/";
+        String appPath = project.getBasePath() + "/" + module.getName().substring(module.getName().indexOf(".") + 1) + "/src/main/java/" + packagePath + "/";
         return appPath;
     }
 
@@ -141,8 +169,7 @@ public class MVPArmsPluginAction extends AnAction {
      * @return
      */
     private String getAppResPath() {
-        String packagePath = packageName.replace(".", "/");
-        String appPath = project.getBasePath() + "/App/src/main/res/layout/";
+        String appPath = project.getBasePath() + "/" + module.getName().substring(module.getName().indexOf(".") + 1) + "/src/main/res/layout/";
         return appPath;
     }
 
@@ -160,7 +187,74 @@ public class MVPArmsPluginAction extends AnAction {
         if (content.contains("${activityLayoutName}")) {
             content = content.replace("${activityLayoutName}", "activity_" + pageName.toLowerCase());
         }
+        if (content.contains("${fragmentLayoutName}")) {
+            content = content.replace("${fragmentLayoutName}", "fragment_" + pageName.toLowerCase());
+        }
+        return content;
+    }
 
+    /**
+     * 替换模板中scope字符
+     *
+     * @param content
+     * @return
+     */
+    private String dealTemplateScope(String content, boolean semicolon) {
+        if (content.contains("${scope}")) {
+            if (needActivity) {
+                content = content.replace("${scope}", "@ActivityScope");
+            } else {
+                content = content.replace("${scope}", "@FragmentScope");
+            }
+        }
+        if (content.contains("${inject}")) {
+            if (needActivity && needFragment) {
+                content = content.replace("${inject}", "void inject(" + pageName + "Activity activity);"
+                        + "\n\n" +
+                        "    void inject(" + pageName + "Fragment fragment);");
+            } else if (needActivity) {
+                content = content.replace("${inject}", "void inject(" + pageName + "Activity activity);");
+            } else if (needFragment) {
+                content = content.replace("${inject}", "void inject(" + pageName + "Fragment fragment);");
+            }
+        }
+        if (content.contains("${scopeImport}") || content.contains("${scopeLessImport}")) {
+            if (needActivity && needFragment) {
+                String scopeLessImport = "import com.jess.arms.di.scope.ActivityScope";
+                if (semicolon)
+                    scopeLessImport = scopeLessImport + ";";
+                String scopeImport = scopeLessImport + "\n" +
+                        "import " + packageName + ".mvp.ui.activity." + pageName + "Activity";
+                if (semicolon)
+                    scopeImport = scopeImport + ";";
+                scopeImport = scopeImport + "\n" +
+                        "import " + packageName + ".mvp.ui.fragment." + pageName + "Fragment";
+                if (semicolon)
+                    scopeImport = scopeImport + ";";
+                content = content.replace("${scopeImport}", scopeImport);
+                content = content.replace("${scopeLessImport}", scopeLessImport);
+            } else if (needActivity) {
+                String scopeLessImport = "import com.jess.arms.di.scope.ActivityScope";
+                if (semicolon)
+                    scopeLessImport = scopeLessImport + ";";
+                String scopeImport = scopeLessImport + "\n" +
+                        "import " + packageName + ".mvp.ui.activity." + pageName + "Activity";
+                if (semicolon)
+                    scopeImport = scopeImport + ";";
+                content = content.replace("${scopeImport}", scopeImport);
+                content = content.replace("${scopeLessImport}", scopeLessImport);
+            } else if (needFragment) {
+                String scopeLessImport = "import com.jess.arms.di.scope.FragmentScope";
+                if (semicolon)
+                    scopeLessImport = scopeLessImport + ";";
+                String scopeImport = scopeLessImport + "\n" +
+                        "import " + packageName + ".mvp.ui.fragment." + pageName + "Fragment";
+                if (semicolon)
+                    scopeImport = scopeImport + ";";
+                content = content.replace("${scopeImport}", scopeImport);
+                content = content.replace("${scopeLessImport}", scopeLessImport);
+            }
+        }
         return content;
     }
 
@@ -254,7 +348,7 @@ public class MVPArmsPluginAction extends AnAction {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(project.getBasePath() + "/App/src/main/AndroidManifest.xml");
+            Document doc = db.parse(project.getBasePath() + "/" + module.getName().substring(module.getName().indexOf(".") + 1) + "/src/main/AndroidManifest.xml");
 
             NodeList nodeList = doc.getElementsByTagName("manifest");
             for (int i = 0; i < nodeList.getLength(); i++) {

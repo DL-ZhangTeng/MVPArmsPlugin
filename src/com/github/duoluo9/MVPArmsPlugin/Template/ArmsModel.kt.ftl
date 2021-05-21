@@ -5,12 +5,13 @@ import com.google.gson.Gson
 import com.jess.arms.integration.IRepositoryManager
 import com.jess.arms.mvp.BaseModel
 
-import com.jess.arms.di.scope.ActivityScope
+${scopeLessImport}
+
 import javax.inject.Inject
 
 import ${packageName}.mvp.contract.${pageName}Contract
 
-@ActivityScope
+${scope}
 class ${pageName}Model
 @Inject
 constructor(repositoryManager: IRepositoryManager) : BaseModel(repositoryManager), ${pageName}Contract.Model{

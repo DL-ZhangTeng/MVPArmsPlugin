@@ -1,12 +1,12 @@
 package ${packageName}.di.module;
 
-import com.jess.arms.di.scope.ActivityScope;
+${scopeLessImport}
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
-import ${packageName}.mvp.contract.${pageName}Contract
+import ${packageName}.mvp.contract.${pageName}Contract;
 import ${packageName}.mvp.model.${pageName}Model;
 
 @Module
