@@ -26,6 +26,7 @@ public class MVPArmsPluginAction extends AnAction {
     private String pageName;
     private boolean needActivity;
     private boolean needFragment;
+    private boolean isKotlin;
 
 
     private enum CodeType {
@@ -54,10 +55,11 @@ public class MVPArmsPluginAction extends AnAction {
      * 初始化Dialog
      */
     private void init() {
-        MyDialog myDialog = new MyDialog((pageName, needActivity, needFragment) -> {
+        MyDialog myDialog = new MyDialog((pageName, needActivity, needFragment, isKotlin) -> {
             MVPArmsPluginAction.this.pageName = pageName;
             MVPArmsPluginAction.this.needActivity = needActivity;
             MVPArmsPluginAction.this.needFragment = needFragment;
+            MVPArmsPluginAction.this.isKotlin = isKotlin;
             createClassFiles();
         });
         myDialog.setVisible(true);
@@ -94,50 +96,72 @@ public class MVPArmsPluginAction extends AnAction {
         String appPath = getAppPath();
         switch (codeType) {
             case Activity:
-                fileName = "ArmsActivity.kt.ftl";
+                fileName = isKotlin ? "ArmsActivity.kt.ftl" : "ArmsActivity.java.ftl";
                 content = ReadTemplateFile(fileName);
                 content = dealTemplateContent(content);
-                writeToFile(content, appPath + "mvp/ui/activity", pageName + "Activity.kt");
+                if (isKotlin)
+                    writeToFile(content, appPath + "mvp/ui/activity", pageName + "Activity.kt");
+                else
+                    writeToFile(content, appPath + "mvp/ui/activity", pageName + "Activity.java");
+
                 break;
             case Fragment:
-                fileName = "ArmsFragment.kt.ftl";
+                fileName = isKotlin ? "ArmsFragment.kt.ftl" : "ArmsFragment.java.ftl";
                 content = ReadTemplateFile(fileName);
                 content = dealTemplateContent(content);
-                writeToFile(content, appPath + "mvp/ui/fragment", pageName + "fragment.kt");
+                if (isKotlin)
+                    writeToFile(content, appPath + "mvp/ui/fragment", pageName + "Fragment.kt");
+                else
+                    writeToFile(content, appPath + "mvp/ui/fragment", pageName + "Fragment.java");
                 break;
             case Contract:
-                fileName = "ArmsContract.kt.ftl";
+                fileName = isKotlin ? "ArmsContract.kt.ftl" : "ArmsContract.java.ftl";
                 content = ReadTemplateFile(fileName);
                 content = dealTemplateContent(content);
-                writeToFile(content, appPath + "mvp/contract", pageName + "Contract.kt");
+                if (isKotlin)
+                    writeToFile(content, appPath + "mvp/contract", pageName + "Contract.kt");
+                else
+                    writeToFile(content, appPath + "mvp/contract", pageName + "Contract.java");
                 break;
             case Presenter:
-                fileName = "ArmsPresenter.kt.ftl";
+                fileName = isKotlin ? "ArmsPresenter.kt.ftl" : "ArmsPresenter.java.ftl";
                 content = ReadTemplateFile(fileName);
-                content = dealTemplateScope(content, false);
+                content = dealTemplateScope(content);
                 content = dealTemplateContent(content);
-                writeToFile(content, appPath + "mvp/presenter", pageName + "Presenter.kt");
+                if (isKotlin)
+                    writeToFile(content, appPath + "mvp/presenter", pageName + "Presenter.kt");
+                else
+                    writeToFile(content, appPath + "mvp/presenter", pageName + "Presenter.java");
                 break;
             case MODEL:
-                fileName = "ArmsModel.kt.ftl";
+                fileName = isKotlin ? "ArmsModel.kt.ftl" : "ArmsModel.java.ftl";
                 content = ReadTemplateFile(fileName);
-                content = dealTemplateScope(content, false);
+                content = dealTemplateScope(content);
                 content = dealTemplateContent(content);
-                writeToFile(content, appPath + "mvp/model", pageName + "Model.kt");
+                if (isKotlin)
+                    writeToFile(content, appPath + "mvp/model", pageName + "Model.kt");
+                else
+                    writeToFile(content, appPath + "mvp/model", pageName + "Model.java");
                 break;
             case COMPONENT:
-                fileName = "ArmsComponent.java.ftl";
+                fileName = isKotlin ? "ArmsComponent.kt.ftl" : "ArmsComponent.java.ftl";
                 content = ReadTemplateFile(fileName);
-                content = dealTemplateScope(content, true);
+                content = dealTemplateScope(content);
                 content = dealTemplateContent(content);
-                writeToFile(content, appPath + "di/component", pageName + "Component.java");
+                if (isKotlin)
+                    writeToFile(content, appPath + "di/component", pageName + "Component.kt");
+                else
+                    writeToFile(content, appPath + "di/component", pageName + "Component.java");
                 break;
             case MODULE:
-                fileName = "ArmsModule.java.ftl";
+                fileName = isKotlin ? "ArmsModule.kt.ftl" : "ArmsModule.java.ftl";
                 content = ReadTemplateFile(fileName);
-                content = dealTemplateScope(content, true);
+                content = dealTemplateScope(content);
                 content = dealTemplateContent(content);
-                writeToFile(content, appPath + "di/module", pageName + "Module.java");
+                if (isKotlin)
+                    writeToFile(content, appPath + "di/module", pageName + "Module.kt");
+                else
+                    writeToFile(content, appPath + "di/module", pageName + "Module.java");
                 break;
             case Activity_LAYOUT:
                 fileName = "simple.xml.ftl";
@@ -199,7 +223,7 @@ public class MVPArmsPluginAction extends AnAction {
      * @param content
      * @return
      */
-    private String dealTemplateScope(String content, boolean semicolon) {
+    private String dealTemplateScope(String content) {
         if (content.contains("${scope}")) {
             if (needActivity) {
                 content = content.replace("${scope}", "@ActivityScope");
@@ -209,47 +233,61 @@ public class MVPArmsPluginAction extends AnAction {
         }
         if (content.contains("${inject}")) {
             if (needActivity && needFragment) {
-                content = content.replace("${inject}", "void inject(" + pageName + "Activity activity);"
-                        + "\n\n" +
-                        "    void inject(" + pageName + "Fragment fragment);");
+                if (isKotlin) {
+                    content = content.replace("${inject}", "fun inject(activity: " + pageName + "Activity?)"
+                            + "\n\n" +
+                            "    fun inject(fragment: " + pageName + "Fragment?)");
+                } else {
+                    content = content.replace("${inject}", "void inject(" + pageName + "Activity activity);"
+                            + "\n\n" +
+                            "    void inject(" + pageName + "Fragment fragment);");
+                }
             } else if (needActivity) {
-                content = content.replace("${inject}", "void inject(" + pageName + "Activity activity);");
+                if (isKotlin){
+                    content = content.replace("${inject}", "fun inject(activity: " + pageName + "Activity?)");
+                }else {
+                    content = content.replace("${inject}", "void inject(" + pageName + "Activity activity);");
+                }
             } else if (needFragment) {
-                content = content.replace("${inject}", "void inject(" + pageName + "Fragment fragment);");
+                if (isKotlin){
+                    content = content.replace("${inject}", "fun inject(fragment: " + pageName + "Fragment?)");
+                }else {
+                    content = content.replace("${inject}", "void inject(" + pageName + "Fragment fragment);");
+                }
             }
         }
         if (content.contains("${scopeImport}") || content.contains("${scopeLessImport}")) {
             if (needActivity && needFragment) {
                 String scopeLessImport = "import com.jess.arms.di.scope.ActivityScope";
-                if (semicolon)
+                if (!isKotlin)
                     scopeLessImport = scopeLessImport + ";";
                 String scopeImport = scopeLessImport + "\n" +
                         "import " + packageName + ".mvp.ui.activity." + pageName + "Activity";
-                if (semicolon)
+                if (!isKotlin)
                     scopeImport = scopeImport + ";";
                 scopeImport = scopeImport + "\n" +
                         "import " + packageName + ".mvp.ui.fragment." + pageName + "Fragment";
-                if (semicolon)
+                if (!isKotlin)
                     scopeImport = scopeImport + ";";
                 content = content.replace("${scopeImport}", scopeImport);
                 content = content.replace("${scopeLessImport}", scopeLessImport);
             } else if (needActivity) {
                 String scopeLessImport = "import com.jess.arms.di.scope.ActivityScope";
-                if (semicolon)
+                if (!isKotlin)
                     scopeLessImport = scopeLessImport + ";";
                 String scopeImport = scopeLessImport + "\n" +
                         "import " + packageName + ".mvp.ui.activity." + pageName + "Activity";
-                if (semicolon)
+                if (!isKotlin)
                     scopeImport = scopeImport + ";";
                 content = content.replace("${scopeImport}", scopeImport);
                 content = content.replace("${scopeLessImport}", scopeLessImport);
             } else if (needFragment) {
                 String scopeLessImport = "import com.jess.arms.di.scope.FragmentScope";
-                if (semicolon)
+                if (!isKotlin)
                     scopeLessImport = scopeLessImport + ";";
                 String scopeImport = scopeLessImport + "\n" +
                         "import " + packageName + ".mvp.ui.fragment." + pageName + "Fragment";
-                if (semicolon)
+                if (!isKotlin)
                     scopeImport = scopeImport + ";";
                 content = content.replace("${scopeImport}", scopeImport);
                 content = content.replace("${scopeLessImport}", scopeLessImport);

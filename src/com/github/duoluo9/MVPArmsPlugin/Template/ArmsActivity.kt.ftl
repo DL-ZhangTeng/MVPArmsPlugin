@@ -8,7 +8,6 @@ import com.jess.arms.di.component.AppComponent
 import com.jess.arms.utils.ArmsUtils
 
 import ${packageName}.di.component.Dagger${pageName}Component
-import ${packageName}.di.module.${pageName}Module
 import ${packageName}.mvp.contract.${pageName}Contract
 import ${packageName}.mvp.presenter.${pageName}Presenter
 

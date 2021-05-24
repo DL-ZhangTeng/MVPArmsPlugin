@@ -10,6 +10,7 @@ public class MyDialog extends JDialog {
     private JTextField textField1;
     private JRadioButton radioButton1;
     private JRadioButton radioButton2;
+    private JRadioButton radioButton3;
 
     private DialogCallBack mCallBack;
 
@@ -49,7 +50,7 @@ public class MyDialog extends JDialog {
 
     private void onOK() {
         if (null != mCallBack) {
-            mCallBack.ok(textField1.getText().trim(), radioButton1.isSelected(), radioButton2.isSelected());
+            mCallBack.ok(textField1.getText().trim(), radioButton1.isSelected(), radioButton2.isSelected(), radioButton3.isSelected());
         }
         dispose();
     }
@@ -59,6 +60,6 @@ public class MyDialog extends JDialog {
     }
 
     public interface DialogCallBack {
-        void ok(String pageName, boolean needActivity, boolean needFragment);
+        void ok(String pageName, boolean needActivity, boolean needFragment, boolean isKotlin);
     }
 }
