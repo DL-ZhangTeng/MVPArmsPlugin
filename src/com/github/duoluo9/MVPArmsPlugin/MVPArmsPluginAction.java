@@ -205,6 +205,15 @@ public class MVPArmsPluginAction extends AnAction {
      */
     private String dealTemplateContent(String content) {
         content = content.replace("${pageName}", pageName);
+        if (content.contains("${pageNameFun}")) {
+            if (pageName.length() > 1) {
+                content = content.replace("${pageNameFun}", pageName.substring(0, 1).toLowerCase() + pageName.substring(1));
+            } else if (pageName.length() == 1) {
+                content = content.replace("${pageNameFun}", pageName.substring(0, 1).toLowerCase());
+            } else {
+                content = content.replace("${pageNameFun}", pageName);
+            }
+        }
         if (content.contains("${packageName}")) {
             content = content.replace("${packageName}", packageName);
         }
@@ -243,15 +252,15 @@ public class MVPArmsPluginAction extends AnAction {
                             "    void inject(" + pageName + "Fragment fragment);");
                 }
             } else if (needActivity) {
-                if (isKotlin){
+                if (isKotlin) {
                     content = content.replace("${inject}", "fun inject(activity: " + pageName + "Activity?)");
-                }else {
+                } else {
                     content = content.replace("${inject}", "void inject(" + pageName + "Activity activity);");
                 }
             } else if (needFragment) {
-                if (isKotlin){
+                if (isKotlin) {
                     content = content.replace("${inject}", "fun inject(fragment: " + pageName + "Fragment?)");
-                }else {
+                } else {
                     content = content.replace("${inject}", "void inject(" + pageName + "Fragment fragment);");
                 }
             }
