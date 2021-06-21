@@ -15,6 +15,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 public class MVPArmsPluginAction extends AnAction {
 
@@ -28,6 +29,10 @@ public class MVPArmsPluginAction extends AnAction {
     private boolean needFragment;
     private boolean isKotlin;
 
+    private String currentDate;
+    private String userName;
+    private String computerName;
+    private String userDomain;
 
     private enum CodeType {
         Activity, Fragment, COMPONENT, Contract, Presenter, MODEL, MODULE, Activity_LAYOUT, Fragment_LAYOUT
@@ -38,6 +43,12 @@ public class MVPArmsPluginAction extends AnAction {
         project = e.getData(PlatformDataKeys.PROJECT);
         module = (Module) e.getDataContext().getData("module");
         packageName = getPackageName();
+        currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
+        Map<String, String> map = System.getenv();
+        userName = map.get("USERNAME");// 获取用户名
+        computerName = map.get("COMPUTERNAME");// 获取计算机名
+        userDomain = map.get("USERDOMAIN");// 获取计算机域名
+
         init();
         refreshProject(e);
     }
@@ -63,7 +74,6 @@ public class MVPArmsPluginAction extends AnAction {
             createClassFiles();
         });
         myDialog.setVisible(true);
-
     }
 
     /**
@@ -223,6 +233,13 @@ public class MVPArmsPluginAction extends AnAction {
         if (content.contains("${fragmentLayoutName}")) {
             content = content.replace("${fragmentLayoutName}", "fragment_" + pageName.toLowerCase());
         }
+        if (content.contains("${author}")) {
+            content = content.replace("${author}", userName);
+        }
+        if (content.contains("${date}")) {
+            content = content.replace("${date}", currentDate);
+        }
+
         return content;
     }
 
