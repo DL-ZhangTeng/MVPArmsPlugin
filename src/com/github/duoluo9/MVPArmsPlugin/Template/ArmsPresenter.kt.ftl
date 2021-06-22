@@ -27,25 +27,25 @@ BasePresenter<${pageName}Contract.Model, ${pageName}Contract.View>(model,rootVie
      * @description: 注入mErrorHandler，用于统一的异常处理
      */
     @Inject
-    var mErrorHandler:RxErrorHandler? = null
+    lateinit var mErrorHandler:RxErrorHandler
 
     /**
      * @description: 注入mApplication
      */
     @Inject
-    var mApplication:Application? = null
+    lateinit var mApplication:Application
 
     /**
      * @description: 注入mImageLoader，用于图片加载
      */
     @Inject
-    var mImageLoader:ImageLoader? = null
+    lateinit var mImageLoader:ImageLoader
 
     /**
      * @description: 注入mAppManager
      */
     @Inject
-    var mAppManager:AppManager? = null
+    lateinit var mAppManager:AppManager
 
     /**
      * @return void
@@ -53,9 +53,5 @@ BasePresenter<${pageName}Contract.Model, ${pageName}Contract.View>(model,rootVie
      */
     override fun onDestroy() {
         super.onDestroy()
-        mErrorHandler = null
-        mAppManager = null
-        mImageLoader = null
-        mApplication = null
     }
 }

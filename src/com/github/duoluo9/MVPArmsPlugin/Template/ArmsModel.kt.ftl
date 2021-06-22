@@ -26,13 +26,13 @@ constructor(repositoryManager: IRepositoryManager) : BaseModel(repositoryManager
      * @description: 注入gson对象，用于数据序列化
      */
     @Inject
-    var mGson: Gson? = null
+    lateinit var mGson: Gson
 
     /**
      * @description: 注入application
      */
     @Inject
-    var mApplication: Application? = null
+    lateinit var mApplication: Application
 
     /**
      * @return void
@@ -40,7 +40,5 @@ constructor(repositoryManager: IRepositoryManager) : BaseModel(repositoryManager
      */
     override fun onDestroy() {
         super.onDestroy()
-        mGson = null
-        mApplication = null
     }
 }
