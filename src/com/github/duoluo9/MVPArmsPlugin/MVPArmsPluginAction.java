@@ -19,6 +19,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -182,12 +183,30 @@ public class MVPArmsPluginAction extends AnAction {
             case Activity_LAYOUT:
                 fileName = "simple.xml.ftl";
                 content = ReadTemplateFile(fileName);
-                writeToFile(content, getAppResPath(), "activity_" + pageName.toLowerCase() + ".xml");
+
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("activity");
+                ArrayList<String> activityChildNames = splitByUpperCase(pageName);
+                for (String activityChildName : activityChildNames) {
+                    stringBuilder.append("_").append(activityChildName.toLowerCase());
+                }
+                stringBuilder.append(".xml");
+
+                writeToFile(content, getAppResPath(), stringBuilder.toString());
                 break;
             case Fragment_LAYOUT:
                 fileName = "simple.xml.ftl";
                 content = ReadTemplateFile(fileName);
-                writeToFile(content, getAppResPath(), "fragment_" + pageName.toLowerCase() + ".xml");
+
+                StringBuilder stringBuilder1 = new StringBuilder();
+                stringBuilder1.append("fragment");
+                ArrayList<String> activityChildNames1 = splitByUpperCase(pageName);
+                for (String activityChildName : activityChildNames1) {
+                    stringBuilder1.append("_").append(activityChildName.toLowerCase());
+                }
+                stringBuilder1.append(".xml");
+
+                writeToFile(content, getAppResPath(), stringBuilder1.toString());
                 break;
         }
     }
@@ -234,10 +253,26 @@ public class MVPArmsPluginAction extends AnAction {
             content = content.replace("${packageName}", packageName);
         }
         if (content.contains("${activityLayoutName}")) {
-            content = content.replace("${activityLayoutName}", "activity_" + pageName.toLowerCase());
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("activity");
+            ArrayList<String> activityChildNames = splitByUpperCase(pageName);
+            for (String activityChildName : activityChildNames) {
+                stringBuilder.append("_").append(activityChildName.toLowerCase());
+            }
+
+            content = content.replace("${activityLayoutName}", stringBuilder.toString());
         }
         if (content.contains("${fragmentLayoutName}")) {
-            content = content.replace("${fragmentLayoutName}", "fragment_" + pageName.toLowerCase());
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("fragment");
+            ArrayList<String> activityChildNames = splitByUpperCase(pageName);
+            for (String activityChildName : activityChildNames) {
+                stringBuilder.append("_").append(activityChildName.toLowerCase());
+            }
+
+            content = content.replace("${fragmentLayoutName}", stringBuilder.toString());
         }
         if (content.contains("${author}")) {
             content = content.replace("${author}", userName);
@@ -469,5 +504,22 @@ public class MVPArmsPluginAction extends AnAction {
         } catch (TransformerException | FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 根据大写字母拆分数组
+     */
+    private ArrayList<String> splitByUpperCase(String str) {
+        ArrayList<String> rs = new ArrayList<String>();
+        int index = 0;
+        int len = str.length();
+        for (int i = 1; i < len; i++) {
+            if (Character.isUpperCase(str.charAt(i))) {
+                rs.add(str.substring(index, i));
+                index = i;
+            }
+        }
+        rs.add(str.substring(index, len));
+        return rs;
     }
 }
